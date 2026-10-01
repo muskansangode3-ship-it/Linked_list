@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Music Playlist Manager</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3e8ff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #6a1b9a;
+        }
+
+        h2 {
+            color: #6a1b9a;
+        }
+
+        .form-box,
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #aaa;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: #8e44ad;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #6c3483;
+        }
+
+        .song {
+            background: #f8f0ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .song-info {
+            font-size: 16px;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        #message {
+            text-align: center;
+            font-weight: bold;
+            color: #6a1b9a;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🎵 Music Playlist Manager</h1>
+
+        <div class="form-box">
+
+            <input type="text"
+                   id="songName"
+                   placeholder="Enter Song Name">
+
+            <input type="text"
+                   id="artistName"
+                   placeholder="Enter Artist Name">
+
+            <button onclick="addSong()">
+                Add Song
+            </button>
+
+        </div>
+
+        <h2>My Playlist</h2>
+
+        <div id="playlist"></div>
+
+        <div class="search-box">
+
+            <input type="text"
+                   id="searchSong"
+                   placeholder="Search Song">
+
+            <button onclick="searchSong()">
+                Search
+            </button>
+
+        </div>
+
+        <p id="message"></p>
+
+    </div>
+
+
+    <script>
+
+        // ==============================
+        // NODE
+        // ==============================
+
+        class Song {
+
+            constructor(name, artist) {
+
+                this.name = name;
+                this.artist = artist;
+
+                // Pointer to next node
+                this.next = null;
+            }
+        }
+
+
+        // ==============================
+        // LINKED LIST
+        // ==============================
+
+        class Playlist {
+
+            constructor() {
+
+                // Head points to first song
+                this.head = null;
+            }
+
+
+            // INSERTION
+            addSong(name, artist) {
+
+                let newSong = new Song(name, artist);
+
+                if (this.head === null) {
+
+                    this.head = newSong;
+
+                } else {
+
+                    let temp = this.head;
+
+                    while (temp.next !== null) {
+
+                        temp = temp.next;
+                    }
+
+                    temp.next = newSong;
+                }
+            }
+
+
+            // DELETION
+            deleteSong(name) {
+
+                if (this.head === null) {
+
+                    return false;
+                }
+
+
+                // Delete first song
+
+                if (this.head.name.toLowerCase()
+                    === name.toLowerCase()) {
+
+                    this.head = this.head.next;
+
+                    return true;
+                }
+
+
+                let temp = this.head;
+
+                while (temp.next !== null) {
+
+                    if (temp.next.name.toLowerCase()
+                        === name.toLowerCase()) {
+
+                        temp.next = temp.next.next;
+
+                        return true;
+                    }
+
+                    temp = temp.next;
+                }
+
+                return false;
+            }
+
+
+            // SEARCHING
+            searchSong(name) {
+
+                let temp = this.head;
+
+                while (temp !== null) {
+
+                    if (temp.name.toLowerCase()
+                        === name.toLowerCase()) {
+
+                        return temp;
+                    }
+
+                    temp = temp.next;
+                }
+
+                return null;
+            }
+
+        }
+
+
+        // Create Playlist
+
+        let playlist = new Playlist();
+
+
+        // ==============================
+        // ADD SONG
+        // ==============================
+
+        function addSong() {
+
+            let songName =
+                document.getElementById("songName").value;
+
+            let artistName =
+                document.getElementById("artistName").value;
+
+
+            if (songName === "" || artistName === "") {
+
+                alert("Please enter song name and artist name.");
+
+                return;
+            }
+
+
+            playlist.addSong(songName, artistName);
+
+
+            document.getElementById("songName").value = "";
+
+            document.getElementById("artistName").value = "";
+
+
+            displayPlaylist();
+        }
+
+
+        // ==============================
+        // DISPLAY PLAYLIST
+        // ==============================
+
+        function displayPlaylist() {
+
+            let playlistDiv =
+                document.getElementById("playlist");
+
+
+            playlistDiv.innerHTML = "";
+
+
+            let temp = playlist.head;
+
+
+            while (temp !== null) {
+
+                let songDiv =
+                    document.createElement("div");
+
+
+                songDiv.className = "song";
+
+
+                songDiv.innerHTML =
+
+                    `
+                    <div class="song-info">
+
+                        🎵 <b>${temp.name}</b>
+                        <br>
+
+                        🎤 ${temp.artist}
+
+                    </div>
+
+                    <button
+                        class="delete-btn"
+                        onclick="deleteSong('${temp.name}')">
+
+                        Delete
+
+                    </button>
+                    `;
+
+
+                playlistDiv.appendChild(songDiv);
+
+
+                // Move to next node
+
+                temp = temp.next;
+            }
+        }
+
+
+        // ==============================
+        // DELETE SONG
+        // ==============================
+
+        function deleteSong(name) {
+
+            let deleted =
+                playlist.deleteSong(name);
+
+
+            if (deleted) {
+
+                document.getElementById("message")
+                    .innerText =
+                    "Song deleted successfully!";
+
+            } else {
+
+                document.getElementById("message")
+                    .innerText =
+                    "Song not found!";
+            }
+
+
+            displayPlaylist();
+        }
+
+
+        // ==============================
+        // SEARCH SONG
+        // ==============================
+
+        function searchSong() {
+
+            let name =
+                document.getElementById("searchSong").value;
+
+
+            let result =
+                playlist.searchSong(name);
+
+
+            if (result !== null) {
+
+                document.getElementById("message")
+                    .innerText =
+                    "🎵 Song Found: " +
+                    result.name +
+                    " - " +
+                    result.artist;
+
+            } else {
+
+                document.getElementById("message")
+                    .innerText =
+                    "❌ Song not found!";
+            }
+        }
+
+    </script>
+
+</body>
+</html>
